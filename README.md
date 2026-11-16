@@ -1,6 +1,6 @@
 # healthOps
 
-API para consulta de estabelecimentos, construída com **FastAPI** e **PostgreSQL**.
+API para consulta de estabelecimentos de saúde (UBSs, hospitais, clínicas etc.), construída com **FastAPI** e **PostgreSQL**.
 
 > Projeto em estágio inicial.
 
@@ -17,8 +17,12 @@ API para consulta de estabelecimentos, construída com **FastAPI** e **PostgreSQ
 
 ```
 healthOps/
+├── .venv/                    # Ambiente virtual Python (não versionado)
 ├── .env.example              # Modelo das variáveis de ambiente
+├── .gitignore
 ├── compose.yaml              # Container do PostgreSQL
+├── requirements.txt          # Dependências Python
+├── README.md
 └── backend/
     ├── conexao.py            # Script avulso para testar a conexão com o banco
     └── app/
@@ -57,7 +61,11 @@ O `.env` fica na raiz do projeto e não é versionado.
 docker compose up -d
 ```
 
-Os dados ficam persistidos no volume `postgres_data`. A tabela `estabelecimentos` precisa existir no banco; os campos esperados pela API são:
+Os dados ficam persistidos no volume `postgres_data`.
+
+> **Atenção:** o Postgres só lê `POSTGRES_USER`, `POSTGRES_PASSWORD` e `POSTGRES_DB` na **primeira** criação do volume. Se você alterar esses valores depois (por exemplo, ao migrar do nome antigo do projeto), recrie o volume com `docker compose down -v && docker compose up -d` — isso **apaga todos os dados** — ou crie o novo usuário/banco manualmente.
+
+A tabela `estabelecimentos` precisa existir no banco; os campos esperados pela API são:
 
 | Coluna      | Tipo    | Obrigatório |
 |-------------|---------|-------------|
@@ -110,6 +118,8 @@ docker exec -i healthops-db psql -U <POSTGRES_USER> -d <POSTGRES_DB> < schema.sq
 
 ### 3. Ambiente Python
 
+O ambiente virtual fica na raiz do projeto (`healthOps/.venv`). A partir da raiz:
+
 ```bash
 python -m venv .venv
 
@@ -118,12 +128,12 @@ python -m venv .venv
 # Linux/macOS
 source .venv/bin/activate
 
-pip install fastapi uvicorn "psycopg[binary]" psycopg-pool python-dotenv
+pip install -r requirements.txt
 ```
 
 ## Executando a API
 
-A partir da pasta `backend/`:
+Com o ambiente virtual ativado, a partir da pasta `backend/`:
 
 ```bash
 cd backend
@@ -149,9 +159,9 @@ Exemplo de resposta de `/api/estabelecimentos`:
 [
   {
     "id": 1,
-    "nome": "Estabelecimento Exemplo",
+    "nome": "UBS Central",
     "municipio": "São Paulo",
-    "tipo": "Comércio",
+    "tipo": "Unidade Básica de Saúde",
     "ativo": true
   }
 ]
