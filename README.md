@@ -73,6 +73,41 @@ Para acessar o banco pelo terminal:
 docker exec -it healthops-db psql -U <POSTGRES_USER> -d <POSTGRES_DB>
 ```
 
+#### Criando a tabela `estabelecimentos`
+
+Com o `psql` aberto (comando acima), execute:
+
+```sql
+CREATE TABLE IF NOT EXISTS estabelecimentos (
+    id        SERIAL PRIMARY KEY,
+    nome      TEXT    NOT NULL,
+    municipio TEXT    NOT NULL,
+    tipo      TEXT,
+    ativo     BOOLEAN DEFAULT TRUE
+);
+
+-- Índice para as consultas por município
+CREATE INDEX IF NOT EXISTS idx_estabelecimentos_municipio
+    ON estabelecimentos (municipio);
+```
+
+Opcionalmente, insira alguns dados de exemplo:
+
+```sql
+INSERT INTO estabelecimentos (nome, municipio, tipo, ativo) VALUES
+    ('UBS Central',        'São Paulo',      'Unidade Básica de Saúde', TRUE),
+    ('Hospital Municipal', 'Campinas',       'Hospital',                TRUE),
+    ('Clínica Bem-Estar',  'Rio de Janeiro', 'Clínica',                 FALSE);
+```
+
+Confira o resultado com `SELECT * FROM estabelecimentos;` e saia do `psql` com `\q`.
+
+Também é possível executar o SQL sem entrar no `psql`, salvando os comandos em um arquivo (por exemplo, `schema.sql`) e rodando:
+
+```bash
+docker exec -i healthops-db psql -U <POSTGRES_USER> -d <POSTGRES_DB> < schema.sql
+```
+
 ### 3. Ambiente Python
 
 ```bash
